@@ -27,9 +27,9 @@ make_empty_graph <- function(n=0, directed=TRUE) {
 
   directed <- as.logical(directed)
   
-  on.exit( .Call(`C_R_igraph_finalizer`) )
+  on.exit( .Call(`C_R_igraph_finalizer2`) )
   # Function call
-  res <- .Call(`C_R_igraph_empty`, n, directed)
+  res <- .Call(`C_R_igraph_empty2`, n, directed)
 
   res
 }

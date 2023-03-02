@@ -4,6 +4,6 @@ print.header <- function(object) {
     stop("Not a graph object")
   }
 
-  vc <- .Call(`C_R_igraph_vcount`, object)
+  vc <- .Call(`C_R_igraph_vcount2`, object)
   warning(vc)
 }
