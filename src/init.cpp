@@ -85,8 +85,8 @@ SEXP R_igraph_to_SEXP(const igraph_t *graph) {
   SET_CLASS(result, ScalarString(CREATE_STRING_VECTOR("igraph2")));
 
   /* Attributes */
-  SET_VECTOR_ELT(result, 8, graph->attr);
-  REAL(VECTOR_ELT(graph->attr, 0))[0] += 1;
+  SET_VECTOR_ELT(result, 8, reinterpret_cast<SEXP>(graph->attr));
+  REAL(VECTOR_ELT(reinterpret_cast<SEXP>(graph->attr), 0))[0] += 1;
 
   /* Environment for vertex/edge seqs */
   SET_VECTOR_ELT(result, 9, R_NilValue);
