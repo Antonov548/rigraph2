@@ -11,6 +11,10 @@
 #define R_IGRAPH_TYPE_VERSION "0.8.0"
 #define R_IGRAPH_VERSION_VAR ".__igraph_version__."
 
+// #if IGRAPH_INTEGER_SIZE == 64
+// #error "Error"
+// #endif
+
 SEXP R_igraph2_warning(void)
 {
   Rf_warning("hello world");
@@ -67,7 +71,7 @@ SEXP R_igraph_to_SEXP(const igraph_t *graph) {
   SET_VECTOR_ELT(result, 6, NEW_NUMERIC(no_of_nodes+1));
   SET_VECTOR_ELT(result, 7, NEW_NUMERIC(no_of_nodes+1));
 
-  REAL(VECTOR_ELT(result, 0))[0]=no_of_nodes;
+  REAL(VECTOR_ELT(result, 0))[0]=static_cast<uint64_t>(no_of_nodes);
   LOGICAL(VECTOR_ELT(result, 1))[0]=graph->directed;
   memcpy(REAL(VECTOR_ELT(result, 2)), graph->from.stor_begin,
          sizeof(igraph_real_t)*(size_t) no_of_edges);
@@ -122,9 +126,9 @@ int R_SEXP_to_igraph(SEXP graph, igraph_t *res) {
   R_SEXP_to_vector(VECTOR_ELT(graph, 7), &res->is);
 
   /* attributes */
-  REAL(VECTOR_ELT(VECTOR_ELT(graph, 8), 0))[0] = 1; /* R objects refcount */
-  REAL(VECTOR_ELT(VECTOR_ELT(graph, 8), 0))[1] = 0; /* igraph_t objects */
-  res->attr=VECTOR_ELT(graph, 8);
+  //REAL(VECTOR_ELT(VECTOR_ELT(graph, 8), 0))[0] = 1; /* R objects refcount */
+  //REAL(VECTOR_ELT(VECTOR_ELT(graph, 8), 0))[1] = 0; /* igraph_t objects */
+  //res->attr=VECTOR_ELT(graph, 8);
 
   return 0;
 }
@@ -171,7 +175,7 @@ SEXP R_igraph_empty2(SEXP n, SEXP directed) {
   r_result = graph;
 
   UNPROTECT(1);
-  return(r_result);
+  return (r_result);
 }
 
 SEXP R_igraph_empty(SEXP n, SEXP directed) {
@@ -211,7 +215,7 @@ SEXP R_igraph_vcount2(SEXP graph) {
                                         /* Declarations */
   igraph_t c_graph;
   igraph_integer_t c_result;
-  SEXP r_result;
+  SEXP r_result = R_NilValue;
                                         /* Convert input */
   R_SEXP_to_igraph(graph, &c_graph);
                                         /* Call igraph */
