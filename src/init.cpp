@@ -5,15 +5,18 @@
 #include "igraph_datatype.h"
 #include "igraph_interface.h"
 #include "igraph_vector.h"
+#include "igraph_constructors.h"
 
 #include "graphalt.h"
+
+#include <iostream>
 
 #define R_IGRAPH_TYPE_VERSION "0.8.0"
 #define R_IGRAPH_VERSION_VAR ".__igraph_version__."
 
-// #if IGRAPH_INTEGER_SIZE == 64
-// #error "Error"
-// #endif
+#if IGRAPH_INTEGER_SIZE == 64
+#error "Error"
+#endif
 
 SEXP R_igraph2_warning(void)
 {
@@ -88,9 +91,10 @@ SEXP R_igraph_to_SEXP(const igraph_t *graph) {
 
   SET_CLASS(result, ScalarString(CREATE_STRING_VECTOR("igraph2")));
 
+  // Ignroe attributes. No logic with initialization of attributes table
   /* Attributes */
-  SET_VECTOR_ELT(result, 8, reinterpret_cast<SEXP>(graph->attr));
-  REAL(VECTOR_ELT(reinterpret_cast<SEXP>(graph->attr), 0))[0] += 1;
+  // SET_VECTOR_ELT(result, 8, reinterpret_cast<SEXP>(graph->attr));
+  // REAL(VECTOR_ELT(reinterpret_cast<SEXP>(graph->attr), 0))[0] += 1;
 
   /* Environment for vertex/edge seqs */
   SET_VECTOR_ELT(result, 9, R_NilValue);
@@ -101,7 +105,7 @@ SEXP R_igraph_to_SEXP(const igraph_t *graph) {
 }
 
 int R_SEXP_to_vector(SEXP sv, igraph_vector_int_t *v) {
-  v->stor_begin=(int64_t*)REAL(sv);
+  v->stor_begin=(igraph_integer_t*)REAL(sv);
   v->stor_end=v->stor_begin+GET_LENGTH(sv);
   v->end=v->stor_end;
   return 0;
@@ -114,6 +118,39 @@ int R_SEXP_to_vector(SEXP sv, igraph_vector_t *v) {
   return 0;
 }
 
+SEXP R_igraph_create(SEXP edges, SEXP pn, SEXP pdirected) {
+  igraph_t g;
+  igraph_vector_int_t v;
+  igraph_integer_t n=(igraph_integer_t) REAL(pn)[0];
+  igraph_bool_t directed=LOGICAL(pdirected)[0];
+  SEXP result;
+
+  R_SEXP_to_vector(edges, &v);
+
+  int64_t* arr = (int64_t*)REAL(edges);
+  for (size_t i = 0; i < n; ++i)
+  {
+    printf("%f ", arr[i + 1]);
+  }
+  printf("\n");
+
+  std::cout << "COUNT:" << n << std::endl;
+  std::cout << "EDGES:";
+  for (size_t i{0}; i < n; ++i)
+  {
+    std::cout << (int64_t)v.stor_begin[i+1] << std::endl;
+  }
+  std::cout << std::endl;
+
+  igraph_create(&g, &v, n, directed);
+  PROTECT(result=R_igraph_to_SEXP(&g));
+  igraph_destroy(&g);
+
+  UNPROTECT(1);
+  return result;
+}
+
+
 int R_SEXP_to_igraph(SEXP graph, igraph_t *res) {
 
   res->n=(igraph_integer_t) REAL(VECTOR_ELT(graph, 0))[0];
@@ -125,6 +162,7 @@ int R_SEXP_to_igraph(SEXP graph, igraph_t *res) {
   R_SEXP_to_vector(VECTOR_ELT(graph, 6), &res->os);
   R_SEXP_to_vector(VECTOR_ELT(graph, 7), &res->is);
 
+  // Ignroe attributes. No logic with initialization of attributes table
   /* attributes */
   //REAL(VECTOR_ELT(VECTOR_ELT(graph, 8), 0))[0] = 1; /* R objects refcount */
   //REAL(VECTOR_ELT(VECTOR_ELT(graph, 8), 0))[1] = 0; /* igraph_t objects */
@@ -154,6 +192,7 @@ SEXP R_igraph_finalizer2(void) {
   return R_NilValue;
 }
 
+// empty graph using vectors
 SEXP R_igraph_empty2(SEXP n, SEXP directed) {
   igraph_t c_graph;
   igraph_integer_t c_n;
@@ -178,6 +217,7 @@ SEXP R_igraph_empty2(SEXP n, SEXP directed) {
   return (r_result);
 }
 
+// empty igraph using raw pointer
 SEXP R_igraph_empty(SEXP n, SEXP directed) {
                                         /* Declarations */
   igraph_t* c_graph;
@@ -238,6 +278,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"R_igraph_finalizer2", (DL_FUNC) &R_igraph_finalizer2, 0},
     {"R_igraph_vcount", (DL_FUNC) &R_igraph_vcount, 1},
     {"R_igraph_vcount2", (DL_FUNC) &R_igraph_vcount2, 1},
+    {"R_igraph_create", (DL_FUNC) &R_igraph_create, 3},
 
     {NULL, NULL, 0}
 };

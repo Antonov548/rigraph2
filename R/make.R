@@ -1,3 +1,12 @@
+make_graph <- function(edges, ..., n = max(edges), directed = TRUE) {
+  res <- .Call(
+          C_R_igraph_create, as.numeric(edges) - 1, as.numeric(n),
+          as.logical(directed)
+        )
+
+  res
+}
+
 make_empty_graph <- function(n=0, directed=TRUE) {
   # Argument checks
   if (is.null(n)) {

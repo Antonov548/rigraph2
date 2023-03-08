@@ -15,6 +15,7 @@ all: $(SHLIB)
 
 OBJECTS=init.o \
 graphalt.o \
+constructors/basic_constructors.o \
 graph/type_indexededgelist.o \
 graph/caching.o \
 graph/iterators.o \

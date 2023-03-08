@@ -23,3 +23,16 @@ test_that("test empty graph old", {
   print.header_old(g)
 
 })
+
+test_that("test graph old", {
+  igraph2_warning()
+
+  g <- make_graph(c(1, 2, 2, 3, 3, 4, 5, 6), directed = FALSE)
+
+  if (!is_igraph(g)) {
+    stop('Not a graph object')
+  }
+
+  print.header_old(g)
+
+})
