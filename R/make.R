@@ -1,6 +1,6 @@
 make_graph <- function(edges, ..., n = max(edges), directed = TRUE) {
   res <- .Call(
-          C_R_igraph_create, as.numeric(edges) - 1, as.numeric(n),
+          C_R_igraph_create, as.integer(edges- 1), as.integer(n),
           as.logical(directed)
         )
 

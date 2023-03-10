@@ -2,6 +2,10 @@
 
 export(igraph2_warning)
 export(make_empty_graph)
+export(make_empty_graph_old)
 export(is_igraph)
 export(print.header)
+export(print.header_old)
+export(make_graph)
+export(as_edgelist)
 useDynLib(igraph2, .registration=TRUE, .fixes="C_")

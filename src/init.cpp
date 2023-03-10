@@ -1,14 +1,16 @@
 #include "uuid/uuid.h"
 
-#include <math.h>
-
 #include "igraph_datatype.h"
 #include "igraph_interface.h"
 #include "igraph_vector.h"
 #include "igraph_constructors.h"
+#include "igraph_conversion.h"
+#include "igraph_vector_list.h"
 
 #include "graphalt.h"
 
+#include <math.h>
+#include <vector>
 #include <iostream>
 
 #define R_IGRAPH_TYPE_VERSION "0.8.0"
@@ -65,29 +67,29 @@ SEXP R_igraph_to_SEXP(const igraph_t *graph) {
   long int no_of_edges=igraph_ecount(graph);
 
   PROTECT(result=NEW_LIST(10));
-  SET_VECTOR_ELT(result, 0, NEW_NUMERIC(1));
+  SET_VECTOR_ELT(result, 0, NEW_INTEGER(1));
   SET_VECTOR_ELT(result, 1, NEW_LOGICAL(1));
-  SET_VECTOR_ELT(result, 2, NEW_NUMERIC(no_of_edges));
-  SET_VECTOR_ELT(result, 3, NEW_NUMERIC(no_of_edges));
-  SET_VECTOR_ELT(result, 4, NEW_NUMERIC(no_of_edges));
-  SET_VECTOR_ELT(result, 5, NEW_NUMERIC(no_of_edges));
-  SET_VECTOR_ELT(result, 6, NEW_NUMERIC(no_of_nodes+1));
-  SET_VECTOR_ELT(result, 7, NEW_NUMERIC(no_of_nodes+1));
+  SET_VECTOR_ELT(result, 2, NEW_INTEGER(no_of_edges));
+  SET_VECTOR_ELT(result, 3, NEW_INTEGER(no_of_edges));
+  SET_VECTOR_ELT(result, 4, NEW_INTEGER(no_of_edges));
+  SET_VECTOR_ELT(result, 5, NEW_INTEGER(no_of_edges));
+  SET_VECTOR_ELT(result, 6, NEW_INTEGER(no_of_nodes+1));
+  SET_VECTOR_ELT(result, 7, NEW_INTEGER(no_of_nodes+1));
 
-  REAL(VECTOR_ELT(result, 0))[0]=static_cast<uint64_t>(no_of_nodes);
+  INTEGER(VECTOR_ELT(result, 0))[0]=static_cast<uint32_t>(no_of_nodes);
   LOGICAL(VECTOR_ELT(result, 1))[0]=graph->directed;
-  memcpy(REAL(VECTOR_ELT(result, 2)), graph->from.stor_begin,
-         sizeof(igraph_real_t)*(size_t) no_of_edges);
-  memcpy(REAL(VECTOR_ELT(result, 3)), graph->to.stor_begin,
-         sizeof(igraph_real_t)*(size_t) no_of_edges);
-  memcpy(REAL(VECTOR_ELT(result, 4)), graph->oi.stor_begin,
-         sizeof(igraph_real_t)*(size_t) no_of_edges);
-  memcpy(REAL(VECTOR_ELT(result, 5)), graph->ii.stor_begin,
-         sizeof(igraph_real_t)*(size_t) no_of_edges);
-  memcpy(REAL(VECTOR_ELT(result, 6)), graph->os.stor_begin,
-         sizeof(igraph_real_t)*(size_t) (no_of_nodes+1));
-  memcpy(REAL(VECTOR_ELT(result, 7)), graph->is.stor_begin,
-         sizeof(igraph_real_t)*(size_t) (no_of_nodes+1));
+  memcpy(INTEGER(VECTOR_ELT(result, 2)), graph->from.stor_begin,
+         sizeof(igraph_integer_t)*(size_t) no_of_edges);
+  memcpy(INTEGER(VECTOR_ELT(result, 3)), graph->to.stor_begin,
+         sizeof(igraph_integer_t)*(size_t) no_of_edges);
+  memcpy(INTEGER(VECTOR_ELT(result, 4)), graph->oi.stor_begin,
+         sizeof(igraph_integer_t)*(size_t) no_of_edges);
+  memcpy(INTEGER(VECTOR_ELT(result, 5)), graph->ii.stor_begin,
+         sizeof(igraph_integer_t)*(size_t) no_of_edges);
+  memcpy(INTEGER(VECTOR_ELT(result, 6)), graph->os.stor_begin,
+         sizeof(igraph_integer_t)*(size_t) (no_of_nodes+1));
+  memcpy(INTEGER(VECTOR_ELT(result, 7)), graph->is.stor_begin,
+         sizeof(igraph_integer_t)*(size_t) (no_of_nodes+1));
 
   SET_CLASS(result, ScalarString(CREATE_STRING_VECTOR("igraph2")));
 
@@ -105,7 +107,7 @@ SEXP R_igraph_to_SEXP(const igraph_t *graph) {
 }
 
 int R_SEXP_to_vector(SEXP sv, igraph_vector_int_t *v) {
-  v->stor_begin=(igraph_integer_t*)REAL(sv);
+  v->stor_begin=INTEGER(sv);
   v->stor_end=v->stor_begin+GET_LENGTH(sv);
   v->end=v->stor_end;
   return 0;
@@ -118,29 +120,25 @@ int R_SEXP_to_vector(SEXP sv, igraph_vector_t *v) {
   return 0;
 }
 
+std::vector<igraph_integer_t> to_vector(SEXP sv)
+{
+  std::vector<igraph_integer_t> result;
+  auto* values = INTEGER(sv);
+  auto size = GET_LENGTH(sv);
+
+  result.resize(size);
+  for (int i = 0; i < size; ++i) result[i] = static_cast<igraph_integer_t>(values[i]);
+  return result;
+}
+
 SEXP R_igraph_create(SEXP edges, SEXP pn, SEXP pdirected) {
   igraph_t g;
   igraph_vector_int_t v;
-  igraph_integer_t n=(igraph_integer_t) REAL(pn)[0];
+  igraph_integer_t n=(igraph_integer_t) INTEGER(pn)[0];
   igraph_bool_t directed=LOGICAL(pdirected)[0];
   SEXP result;
 
   R_SEXP_to_vector(edges, &v);
-
-  int64_t* arr = (int64_t*)REAL(edges);
-  for (size_t i = 0; i < n; ++i)
-  {
-    printf("%f ", arr[i + 1]);
-  }
-  printf("\n");
-
-  std::cout << "COUNT:" << n << std::endl;
-  std::cout << "EDGES:";
-  for (size_t i{0}; i < n; ++i)
-  {
-    std::cout << (int64_t)v.stor_begin[i+1] << std::endl;
-  }
-  std::cout << std::endl;
 
   igraph_create(&g, &v, n, directed);
   PROTECT(result=R_igraph_to_SEXP(&g));
@@ -153,7 +151,7 @@ SEXP R_igraph_create(SEXP edges, SEXP pn, SEXP pdirected) {
 
 int R_SEXP_to_igraph(SEXP graph, igraph_t *res) {
 
-  res->n=(igraph_integer_t) REAL(VECTOR_ELT(graph, 0))[0];
+  res->n=(igraph_integer_t) INTEGER(VECTOR_ELT(graph, 0))[0];
   res->directed=LOGICAL(VECTOR_ELT(graph, 1))[0];
   R_SEXP_to_vector(VECTOR_ELT(graph, 2), &res->from);
   R_SEXP_to_vector(VECTOR_ELT(graph, 3), &res->to);
@@ -174,6 +172,24 @@ int R_SEXP_to_igraph(SEXP graph, igraph_t *res) {
 SEXP R_igraph_finalizer(void) {
   IGRAPH_FINALLY_FREE();
   return R_NilValue;
+}
+
+SEXP R_igraph_get_edgelist(SEXP graph, SEXP pbycol) {
+
+  igraph_t g;
+  igraph_vector_int_t res;
+  igraph_bool_t bycol=LOGICAL(pbycol)[0];
+  SEXP result;
+
+  R_SEXP_to_igraph(graph, &g);
+  igraph_vector_int_init(&res, 0);
+  igraph_get_edgelist(&g, &res, bycol);
+  PROTECT(result=NEW_INTEGER(igraph_vector_int_size(&res)));
+  igraph_vector_int_copy_to(&res, INTEGER(result));
+  igraph_vector_int_destroy(&res);
+
+  UNPROTECT(1);
+  return result;
 }
 
 SEXP R_igraph_finalizer2(void) {
@@ -279,6 +295,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"R_igraph_vcount", (DL_FUNC) &R_igraph_vcount, 1},
     {"R_igraph_vcount2", (DL_FUNC) &R_igraph_vcount2, 1},
     {"R_igraph_create", (DL_FUNC) &R_igraph_create, 3},
+    {"R_igraph_get_edgelist", (DL_FUNC) &R_igraph_get_edgelist, 2},
 
     {NULL, NULL, 0}
 };
