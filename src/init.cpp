@@ -300,7 +300,6 @@ static const R_CallMethodDef CallEntries[] = {
 };
 
 extern "C" void attribute_visible R_init_igraph2(DllInfo *dll) {
-  register_graph(dll, "graph", "igraph2");
   R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
   R_useDynamicSymbols(dll, FALSE);
 }
