@@ -11,7 +11,6 @@
 
 #include <math.h>
 #include <vector>
-#include <iostream>
 
 #define R_IGRAPH_TYPE_VERSION "0.8.0"
 #define R_IGRAPH_VERSION_VAR ".__igraph_version__."
@@ -195,7 +194,7 @@ SEXP R_igraph_get_edgelist(SEXP graph, SEXP pbycol) {
 SEXP R_igraph_finalizer2(void) {
   IGRAPH_FINALLY_FREE();
   SEXP l1 = PROTECT(install("getNamespace"));
-  SEXP l2 = PROTECT(ScalarString(mkChar("igraph")));
+  SEXP l2 = PROTECT(ScalarString(mkChar("igraph2")));
   SEXP l3 = PROTECT(lang2(l1, l2));
   SEXP rho = PROTECT(EVAL(l3));
   SEXP l4 = PROTECT(install(".igraph.progress"));
