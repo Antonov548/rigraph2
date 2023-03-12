@@ -28,6 +28,8 @@
 #define INTERNAL_GMP 1
 
 #define IGRAPH_F77_SAVE static __thread
+#ifndef IGRAPH_THREAD_LOCAL
 #define IGRAPH_THREAD_LOCAL __thread
+#endif
 
 #endif
