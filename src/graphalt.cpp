@@ -9,7 +9,6 @@ void register_graph(DllInfo* dll, const char* class_name, const char* package_na
 static void delete_graph(SEXP xp){
   auto* c_graph = static_cast<igraph_t*>(R_ExternalPtrAddr(xp));
   igraph_destroy(c_graph);
-  IGRAPH_FINALLY_CLEAN(1);
   delete c_graph;
 }
 
