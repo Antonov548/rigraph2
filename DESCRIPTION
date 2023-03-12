@@ -9,6 +9,8 @@ Depends: methods
 Imports:
     pkgconfig (>= 2.0.0),
     rlang,
+Suggests: 
+    igraph
 License: GPL (>= 2)
 URL: https://igraph.org, https://igraph.discourse.group/
 SystemRequirements:
